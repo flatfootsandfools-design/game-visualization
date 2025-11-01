@@ -25,34 +25,36 @@ export default function GameMap({ games, onSelect, showDeveloperLines, showStudi
     );
   }, []);
 
-  // D3 Dragging
-  useEffect(() => {
-    if (!editMode) return;
+// D3 Dragging
+useEffect(() => {
+  // ✅ Only enable drag if environment variable allows it
+  const isEditModeEnabled = import.meta.env.VITE_EDIT_MODE === "true";
+  if (!isEditModeEnabled || !editMode) return;
 
-    const g = d3.select(gRef.current);
+  const g = d3.select(gRef.current);
 
-    const drag = d3.drag()
-      .on("drag", function (event) {
-        const id = d3.select(this).attr("data-id");
-        const newX = event.x;
-        const newY = event.y;
+  const drag = d3.drag()
+    .on("drag", function (event) {
+      const id = d3.select(this).attr("data-id");
+      const newX = event.x;
+      const newY = event.y;
 
-        d3.select(this).attr("transform", `translate(${newX}, ${newY})`);
+      d3.select(this).attr("transform", `translate(${newX}, ${newY})`);
 
-        // Update React state
-        setPositions((prev) => ({
-          ...prev,
-          [id]: { x: newX, y: newY },
-        }));
-      })
-      .on("end", function (event) {
-        const id = d3.select(this).attr("data-id");
-        const pos = positions[id];
-        console.log(`Updated ${id}: x=${pos.x}, y=${pos.y}`);
-      });
+      setPositions((prev) => ({
+        ...prev,
+        [id]: { x: newX, y: newY },
+      }));
+    })
+    .on("end", function (event) {
+      const id = d3.select(this).attr("data-id");
+      const pos = positions[id];
+      console.log(`Updated ${id}: x=${pos.x}, y=${pos.y}`);
+    });
 
-    g.selectAll(".game-node").call(drag);
-  }, [editMode, positions]);
+  g.selectAll(".game-node").call(drag);
+}, [editMode, positions]);
+
 
   // --- 💾 EXPORT FUNCTION ---
   const handleExport = () => {
